@@ -96,7 +96,9 @@ bun run db:studio    # Open Drizzle Studio GUI
 - `src/core/database/client.ts` - Database client
 - `src/core/supabase/server.ts` - Server-side Supabase client
 - `src/core/supabase/client.ts` - Browser-side Supabase client
-- `src/core/supabase/proxy.ts` - Middleware for session refresh
+- `src/core/supabase/proxy.ts` - Session refresh logic
+- `src/proxy.ts` - Next.js 16 proxy entry point (replaces middleware.ts)
+- `src/features/auth/` - Shared auth actions and hooks
 
 **Important patterns (learned from setup):**
 
@@ -125,6 +127,19 @@ bun run db:studio    # Open Drizzle Studio GUI
    ```typescript
    postgres(url, { prepare: false })
    ```
+
+5. **Server Actions with `useActionState`** (React 19): Actions must take `(prevState, formData)`:
+   ```typescript
+   // Wrong - will cause type errors
+   async function login(formData: FormData) { ... }
+
+   // Correct
+   async function login(_prevState: LoginState, formData: FormData) { ... }
+   ```
+
+6. **Auth route groups**: `(auth)` and `(dashboard)` layouts handle redirects. Check auth in layout, not each page.
+
+7. **Users table trigger**: Run SQL in Supabase dashboard to sync `auth.users` → `public.users`. See `src/core/database/schema.ts` for the trigger code.
 
 ## shadcn/ui Components
 
