@@ -6,9 +6,11 @@ argument-hint: <feature description>
 <objective>
 Transform "$ARGUMENTS" into a battle-tested implementation plan through systematic codebase exploration, pattern extraction, and strategic research.
 
-**Core Principle**: Plan only - no code. Create a context-rich document that enables one-pass implementation success for AI agents.
+**Core Principle**: PLAN ONLY - no code written. Create a context-rich document that enables one-pass implementation success.
 
-**Execution Order**: Codebase first, research second. Solutions must fit existing patterns.
+**Execution Order**: CODEBASE FIRST, RESEARCH SECOND. Solutions must fit existing patterns before introducing new ones.
+
+**Agent Strategy**: Use Task tool with subagent_type="Explore" for codebase intelligence gathering. This ensures thorough pattern discovery before any external research.
 </objective>
 
 <context>
@@ -20,234 +22,325 @@ CLAUDE.md rules: @CLAUDE.md
 
 <process>
 
-## Phase 1: Feature Understanding
+## Phase 1: PARSE - Feature Understanding
 
-**Parse the input and clarify:**
+**EXTRACT from input:**
+- Core problem being solved
+- User value and business impact
+- Feature type: NEW_CAPABILITY | ENHANCEMENT | REFACTOR | BUG_FIX
+- Complexity: LOW | MEDIUM | HIGH
+- Affected systems list
 
-- Extract core problem being solved
-- Identify user value and business impact
-- Determine type: New Capability | Enhancement | Refactor | Bug Fix
-- Assess complexity: Low | Medium | High
-- Map affected systems
-
-**Create or refine user story:**
-
+**FORMULATE user story:**
 ```
 As a <user type>
 I want to <action/goal>
 So that <benefit/value>
 ```
 
-**CHECKPOINT**: If requirements are ambiguous, STOP and ask user for clarification before proceeding.
+**PHASE_1_CHECKPOINT:**
+- [ ] Problem statement is specific and testable
+- [ ] User story follows correct format
+- [ ] Complexity assessment has rationale
+- [ ] Affected systems identified
+
+**GATE**: If requirements are AMBIGUOUS → STOP and ASK user for clarification before proceeding.
 
 ---
 
-## Phase 2: Codebase Intelligence (USE EXPLORE AGENT)
+## Phase 2: EXPLORE - Codebase Intelligence
 
-**Launch Explore agent with thoroughness="very thorough" to discover:**
+**CRITICAL: Use Task tool with subagent_type="Explore" and prompt for thoroughness="very thorough"**
 
-1. **Similar Implementations**
-   - Find analogous features in codebase
-   - Extract patterns with file:line references
-   - Identify naming conventions, error handling, logging patterns
+Example Task invocation:
+```
+Explore the codebase to find patterns, conventions, and integration points
+relevant to implementing: [feature description].
 
-2. **Architecture Patterns**
-   - Directory structure and module organization
-   - Service/repository/controller boundaries
-   - Type definitions and interfaces
+DISCOVER:
+1. Similar implementations - find analogous features with file:line references
+2. Naming conventions - extract actual examples of function/class/file naming
+3. Error handling patterns - how errors are created, thrown, caught
+4. Logging patterns - logger usage, message formats
+5. Type definitions - relevant interfaces and types
+6. Test patterns - test file structure, assertion styles
+7. Integration points - where new code connects to existing
+8. Dependencies - relevant libraries already in use
 
-3. **Integration Points**
-   - Files that need modification
-   - Registration patterns (routes, providers, exports)
-   - Database/API patterns if applicable
+Return ACTUAL code snippets from codebase, not generic examples.
+```
 
-4. **Testing Patterns**
-   - Test framework and conventions
-   - Similar test examples to mirror
-   - Coverage requirements
+**DOCUMENT discoveries in table format:**
 
-5. **Dependencies**
-   - Relevant libraries already in use
-   - How they're integrated (imports, configs)
-   - Version constraints
+| Category | File:Lines | Pattern Description | Code Snippet |
+|----------|-----------|---------------------|--------------|
+| NAMING | `src/features/X/service.ts:10-15` | camelCase functions | `export function createThing()` |
+| ERRORS | `src/features/X/errors.ts:5-20` | Custom error classes | `class ThingNotFoundError` |
+| LOGGING | `src/core/logging/index.ts:1-10` | getLogger pattern | `const logger = getLogger("domain")` |
+| TESTS | `src/features/X/tests/service.test.ts:1-30` | describe/it blocks | `describe("service", () => {` |
+| TYPES | `src/features/X/models.ts:1-20` | Drizzle inference | `type Thing = typeof things.$inferSelect` |
 
-**CRITICAL**: Document patterns with ACTUAL code snippets from codebase, not generic examples.
+**PHASE_2_CHECKPOINT:**
+- [ ] Explore agent launched and completed successfully
+- [ ] At least 3 similar implementations found with file:line refs
+- [ ] Code snippets are ACTUAL (copy-pasted from codebase, not invented)
+- [ ] Integration points mapped with specific file paths
+- [ ] Dependencies cataloged with versions from package.json
 
 ---
 
-## Phase 3: External Research (AFTER codebase analysis)
+## Phase 3: RESEARCH - External Documentation
 
-**Use WebSearch for:**
+**ONLY AFTER Phase 2 is complete** - solutions must fit existing codebase patterns first.
 
-- Official documentation for involved libraries
-- Latest version info and breaking changes
-- Common implementation patterns and gotchas
-- Security considerations
+**SEARCH for (use WebSearch tool):**
+- Official documentation for involved libraries (match versions from package.json)
+- Known gotchas, breaking changes, deprecations
+- Security considerations and best practices
+- Performance optimization patterns
 
-**Compile with specific anchors:**
+**FORMAT references with specificity:**
+```markdown
+- [Library Docs v{version}](https://url#specific-section)
+  - KEY_INSIGHT: {what we learned that affects implementation}
+  - APPLIES_TO: {which task/file this affects}
+  - GOTCHA: {potential pitfall and how to avoid}
+```
+
+**PHASE_3_CHECKPOINT:**
+- [ ] Documentation versions match package.json
+- [ ] URLs include specific section anchors (not just homepage)
+- [ ] Gotchas documented with mitigation strategies
+- [ ] No conflicting patterns between external docs and existing codebase
+
+---
+
+## Phase 4: DESIGN - UX Transformation
+
+**CREATE ASCII diagrams showing user experience before and after:**
+
+```
+╔═══════════════════════════════════════════════════════════════════════════════╗
+║                              BEFORE STATE                                      ║
+╠═══════════════════════════════════════════════════════════════════════════════╣
+║                                                                               ║
+║   ┌─────────────┐         ┌─────────────┐         ┌─────────────┐            ║
+║   │   Screen/   │ ──────► │   Action    │ ──────► │   Result    │            ║
+║   │  Component  │         │   Current   │         │   Current   │            ║
+║   └─────────────┘         └─────────────┘         └─────────────┘            ║
+║                                                                               ║
+║   USER_FLOW: [describe current step-by-step experience]                       ║
+║   PAIN_POINT: [what's missing, broken, or inefficient]                        ║
+║   DATA_FLOW: [how data moves through the system currently]                    ║
+║                                                                               ║
+╚═══════════════════════════════════════════════════════════════════════════════╝
+
+╔═══════════════════════════════════════════════════════════════════════════════╗
+║                               AFTER STATE                                      ║
+╠═══════════════════════════════════════════════════════════════════════════════╣
+║                                                                               ║
+║   ┌─────────────┐         ┌─────────────┐         ┌─────────────┐            ║
+║   │   Screen/   │ ──────► │   Action    │ ──────► │   Result    │            ║
+║   │  Component  │         │    NEW      │         │    NEW      │            ║
+║   └─────────────┘         └─────────────┘         └─────────────┘            ║
+║                                   │                                           ║
+║                                   ▼                                           ║
+║                          ┌─────────────┐                                      ║
+║                          │ NEW_FEATURE │  ◄── [new capability added]          ║
+║                          └─────────────┘                                      ║
+║                                                                               ║
+║   USER_FLOW: [describe new step-by-step experience]                           ║
+║   VALUE_ADD: [what user gains from this change]                               ║
+║   DATA_FLOW: [how data moves through the system after]                        ║
+║                                                                               ║
+╚═══════════════════════════════════════════════════════════════════════════════╝
+```
+
+**DOCUMENT interaction changes:**
+
+| Location | Before | After | User_Action | Impact |
+|----------|--------|-------|-------------|--------|
+| `/route` | State A | State B | Click X | Can now Y |
+| `Component.tsx` | Missing feature | Has feature | Input Z | Gets result W |
+
+**PHASE_4_CHECKPOINT:**
+- [ ] Before state accurately reflects current system behavior
+- [ ] After state shows ALL new capabilities
+- [ ] Data flows are traceable from input to output
+- [ ] User value is explicit and measurable
+
+---
+
+## Phase 5: ARCHITECT - Strategic Design
+
+**ANALYZE deeply (use extended thinking if needed):**
+- ARCHITECTURE_FIT: How does this integrate with vertical slice structure?
+- EXECUTION_ORDER: What must happen first → second → third?
+- FAILURE_MODES: Edge cases, race conditions, error scenarios?
+- PERFORMANCE: Will this scale? Database queries optimized?
+- SECURITY: Attack vectors? Data exposure risks? Auth/authz?
+- MAINTAINABILITY: Will future devs understand this code?
+
+**DECIDE and document:**
 
 ```markdown
-- [Docs Title](https://url#specific-section)
-  - Key insight: What we learned
-  - Why needed: How it applies to our implementation
+APPROACH_CHOSEN: [description]
+RATIONALE: [why this over alternatives - reference codebase patterns]
+
+ALTERNATIVES_REJECTED:
+- [Alternative 1]: Rejected because [specific reason]
+- [Alternative 2]: Rejected because [specific reason]
+
+NOT_BUILDING (explicit scope limits):
+- [Item 1 - explicitly out of scope and why]
+- [Item 2 - explicitly out of scope and why]
 ```
+
+**PHASE_5_CHECKPOINT:**
+- [ ] Approach aligns with existing vertical slice architecture
+- [ ] Dependencies ordered correctly (types → repository → service → routes)
+- [ ] Edge cases identified with specific mitigation strategies
+- [ ] Scope boundaries are explicit and justified
 
 ---
 
-## Phase 4: UX Design (REQUIRED)
+## Phase 6: GENERATE - Implementation Plan File
 
-**Create ASCII diagrams showing before/after UX:**
+**OUTPUT_PATH**: `.agents/plans/{kebab-case-feature-name}.plan.md`
 
-```
-BEFORE:
-┌─────────────────────────────────────┐
-│  [Current user flow or state]       │
-│  Show what exists today             │
-└─────────────────────────────────────┘
+Create directory if needed: `mkdir -p .agents/plans`
 
-AFTER:
-┌─────────────────────────────────────┐
-│  [New user flow or state]           │
-│  Show what will exist after         │
-│  implementation                     │
-└─────────────────────────────────────┘
-```
-
-**Document interaction changes:**
-
-- What screens/endpoints change
-- New user actions available
-- Changed data flows
-
----
-
-## Phase 5: Strategic Design
-
-**Think deeply about:**
-
-- How does this fit existing architecture?
-- What are critical dependencies and execution order?
-- What could go wrong? (edge cases, race conditions)
-- Performance implications?
-- Security considerations?
-
-**Design decisions:**
-
-- Approach chosen with rationale
-- Alternatives rejected with reasons
-- What we're NOT building (explicit scope limits)
-
----
-
-## Phase 6: Generate Implementation Plan
-
-**Save to**: `.agents/plans/{feature-name}.plan.md`
-
-**Plan structure:**
+**PLAN_STRUCTURE** (the template to fill and save):
 
 ```markdown
 # Feature: {Feature Name}
 
 ## Summary
-
-{One paragraph: What we're building and the high-level approach}
+{One paragraph: What we're building and high-level approach}
 
 ## User Story
-
 As a {user type}
 I want to {action}
 So that {benefit}
 
 ## Problem Statement
-
-{What specific problem this solves}
+{Specific problem this solves - must be testable}
 
 ## Solution Statement
-
-{How we're solving it}
+{How we're solving it - architecture overview}
 
 ## Metadata
-
-- **Type**: New Capability | Enhancement | Refactor | Bug Fix
-- **Complexity**: Low | Medium | High
-- **Systems Affected**: {list}
-- **Dependencies**: {external libs/services}
+| Field | Value |
+|-------|-------|
+| Type | NEW_CAPABILITY / ENHANCEMENT / REFACTOR / BUG_FIX |
+| Complexity | LOW / MEDIUM / HIGH |
+| Systems Affected | {comma-separated list} |
+| Dependencies | {external libs/services with versions} |
+| Estimated Tasks | {count} |
 
 ---
 
 ## UX Design
 
-### Before
+### Before State
+```
+{ASCII diagram - current user experience with data flows}
 ```
 
-{ASCII diagram of current state}
-
+### After State
 ```
-
-### After
+{ASCII diagram - new user experience with data flows}
 ```
-
-{ASCII diagram of new state}
-
-````
 
 ### Interaction Changes
-- {Change 1}
-- {Change 2}
+| Location | Before | After | User Impact |
+|----------|--------|-------|-------------|
+| {path/component} | {old behavior} | {new behavior} | {what changes for user} |
 
 ---
 
 ## Mandatory Reading
 
-**CRITICAL: Read these files before implementing:**
+**CRITICAL: Implementation agent MUST read these files before starting any task:**
 
-| File | Lines | Why |
-|------|-------|-----|
-| `path/to/file.ts` | 15-45 | Pattern for X to mirror |
-| `path/to/model.ts` | 100-120 | Type structure to follow |
+| Priority | File | Lines | Why Read This |
+|----------|------|-------|---------------|
+| P0 | `path/to/critical.ts` | 10-50 | Pattern to MIRROR exactly |
+| P1 | `path/to/types.ts` | 1-30 | Types to IMPORT |
+| P2 | `path/to/test.ts` | all | Test pattern to FOLLOW |
 
 **External Documentation:**
-- [Doc Title](url#section) - Why needed
+| Source | Section | Why Needed |
+|--------|---------|------------|
+| [Lib Docs v{version}](url#anchor) | {section name} | {specific reason} |
 
 ---
 
 ## Patterns to Mirror
 
-**Naming Convention:**
+**NAMING_CONVENTION:**
 ```typescript
-// FROM: src/features/example/service.ts:10-15
-{actual code snippet}
-````
-
-**Error Handling:**
-
-```typescript
-// FROM: src/core/api/errors.ts:50-60
-{actual code snippet}
+// SOURCE: src/features/example/service.ts:10-15
+// COPY THIS PATTERN:
+{actual code snippet from codebase}
 ```
 
-**Testing Pattern:**
-
+**ERROR_HANDLING:**
 ```typescript
-// FROM: src/features/example/tests/service.test.ts:1-20
-{actual code snippet}
+// SOURCE: src/features/example/errors.ts:5-20
+// COPY THIS PATTERN:
+{actual code snippet from codebase}
+```
+
+**LOGGING_PATTERN:**
+```typescript
+// SOURCE: src/features/example/service.ts:25-30
+// COPY THIS PATTERN:
+{actual code snippet from codebase}
+```
+
+**REPOSITORY_PATTERN:**
+```typescript
+// SOURCE: src/features/example/repository.ts:10-40
+// COPY THIS PATTERN:
+{actual code snippet from codebase}
+```
+
+**SERVICE_PATTERN:**
+```typescript
+// SOURCE: src/features/example/service.ts:40-80
+// COPY THIS PATTERN:
+{actual code snippet from codebase}
+```
+
+**TEST_STRUCTURE:**
+```typescript
+// SOURCE: src/features/example/tests/service.test.ts:1-25
+// COPY THIS PATTERN:
+{actual code snippet from codebase}
 ```
 
 ---
 
 ## Files to Change
 
-| File               | Action | Justification |
-| ------------------ | ------ | ------------- |
-| `path/new.ts`      | CREATE | {why}         |
-| `path/existing.ts` | UPDATE | {why}         |
+| File | Action | Justification |
+|------|--------|---------------|
+| `src/features/new/models.ts` | CREATE | Type definitions - re-export from schema |
+| `src/features/new/schemas.ts` | CREATE | Zod validation schemas |
+| `src/features/new/errors.ts` | CREATE | Feature-specific errors |
+| `src/features/new/repository.ts` | CREATE | Database operations |
+| `src/features/new/service.ts` | CREATE | Business logic |
+| `src/features/new/index.ts` | CREATE | Public API exports |
+| `src/core/database/schema.ts` | UPDATE | Add table definition |
 
 ---
 
 ## NOT Building (Scope Limits)
 
-- {Explicit out-of-scope item 1}
-- {Explicit out-of-scope item 2}
+Explicit exclusions to prevent scope creep:
+- {Item 1 - explicitly out of scope and why}
+- {Item 2 - explicitly out of scope and why}
 
 ---
 
@@ -255,147 +348,257 @@ So that {benefit}
 
 Execute in order. Each task is atomic and independently verifiable.
 
-### Task 1: {ACTION} {target}
+### Task 1: CREATE `src/core/database/schema.ts` (update)
 
-- **IMPLEMENT**: {specific detail}
-- **MIRROR**: `path/to/pattern.ts:XX-YY`
-- **IMPORTS**: {required imports}
-- **GOTCHA**: {known issue to avoid}
-- **VALIDATE**: `{executable command}`
+- **ACTION**: ADD table definition to schema
+- **IMPLEMENT**: {specific columns, types, constraints}
+- **MIRROR**: `src/core/database/schema.ts:XX-YY` - follow existing table pattern
+- **IMPORTS**: `import { pgTable, text, timestamp } from "drizzle-orm/pg-core"`
+- **GOTCHA**: {known issue to avoid, e.g., "use uuid for id, not serial"}
+- **VALIDATE**: `npx tsc --noEmit` - types must compile
 
-### Task 2: {ACTION} {target}
+### Task 2: CREATE `src/features/new/models.ts`
 
-...
+- **ACTION**: CREATE type definitions file
+- **IMPLEMENT**: Re-export table, define inferred types
+- **MIRROR**: `src/features/projects/models.ts:1-10`
+- **IMPORTS**: `import { things } from "@/core/database/schema"`
+- **TYPES**: `type Thing = typeof things.$inferSelect`
+- **GOTCHA**: Use `$inferSelect` for read types, `$inferInsert` for write
+- **VALIDATE**: `npx tsc --noEmit`
+
+### Task 3: CREATE `src/features/new/schemas.ts`
+
+- **ACTION**: CREATE Zod validation schemas
+- **IMPLEMENT**: CreateThingSchema, UpdateThingSchema
+- **MIRROR**: `src/features/projects/schemas.ts:1-30`
+- **IMPORTS**: `import { z } from "zod/v4"` (note: zod/v4 not zod)
+- **GOTCHA**: z.record requires two args in v4
+- **VALIDATE**: `npx tsc --noEmit`
+
+### Task 4: CREATE `src/features/new/errors.ts`
+
+- **ACTION**: CREATE feature-specific error classes
+- **IMPLEMENT**: ThingNotFoundError, ThingAccessDeniedError
+- **MIRROR**: `src/features/projects/errors.ts:1-40`
+- **PATTERN**: Extend base Error, include code and statusCode
+- **VALIDATE**: `npx tsc --noEmit`
+
+### Task 5: CREATE `src/features/new/repository.ts`
+
+- **ACTION**: CREATE database operations
+- **IMPLEMENT**: findById, findByUserId, create, update, delete
+- **MIRROR**: `src/features/projects/repository.ts:1-60`
+- **IMPORTS**: `import { db } from "@/core/database/client"`
+- **GOTCHA**: Use `results[0]` pattern, not `.first()` - check noUncheckedIndexedAccess
+- **VALIDATE**: `npx tsc --noEmit`
+
+### Task 6: CREATE `src/features/new/service.ts`
+
+- **ACTION**: CREATE business logic layer
+- **IMPLEMENT**: createThing, getThing, updateThing, deleteThing
+- **MIRROR**: `src/features/projects/service.ts:1-80`
+- **PATTERN**: Use repository, add logging, throw custom errors
+- **IMPORTS**: `import { getLogger } from "@/core/logging"`
+- **VALIDATE**: `npx tsc --noEmit && bun run lint`
+
+### Task 7: CREATE `src/features/new/index.ts`
+
+- **ACTION**: CREATE public API exports
+- **IMPLEMENT**: Export types, schemas, errors, service functions
+- **MIRROR**: `src/features/projects/index.ts:1-20`
+- **PATTERN**: Named exports only, hide repository (internal)
+- **VALIDATE**: `npx tsc --noEmit`
+
+### Task 8: CREATE `src/features/new/tests/service.test.ts`
+
+- **ACTION**: CREATE unit tests for service
+- **IMPLEMENT**: Test each service function, happy path + error cases
+- **MIRROR**: `src/features/projects/tests/service.test.ts:1-100`
+- **PATTERN**: Use describe/it from bun:test, mock repository
+- **VALIDATE**: `bun test src/features/new/tests/`
 
 ---
 
 ## Testing Strategy
 
-### Unit Tests
+### Unit Tests to Write
 
-| Test File      | Test Cases | What It Validates |
-| -------------- | ---------- | ----------------- |
-| `file.test.ts` | {cases}    | {purpose}         |
+| Test File | Test Cases | Validates |
+|-----------|-----------|-----------|
+| `src/features/new/tests/schemas.test.ts` | valid input, invalid input | Zod schemas |
+| `src/features/new/tests/errors.test.ts` | error properties | Error classes |
+| `src/features/new/tests/service.test.ts` | CRUD ops, access control | Business logic |
 
-### Integration Tests
+### Edge Cases Checklist
 
-{scope and approach}
-
-### Edge Cases
-
-- [ ] {edge case 1}
-- [ ] {edge case 2}
+- [ ] Empty string inputs
+- [ ] Missing required fields
+- [ ] Unauthorized access attempts
+- [ ] Not found scenarios
+- [ ] Duplicate creation attempts
+- [ ] {feature-specific edge case}
 
 ---
 
 ## Validation Commands
 
-### Level 1: Static Analysis
-
+### Level 1: STATIC_ANALYSIS
 ```bash
 bun run lint && npx tsc --noEmit
 ```
+**EXPECT**: Exit 0, no errors or warnings
 
-### Level 2: Unit Tests
-
+### Level 2: UNIT_TESTS
 ```bash
-bun test {specific-pattern}
+bun test src/features/{feature}/tests/
 ```
+**EXPECT**: All tests pass, coverage >= 80%
 
-### Level 3: Full Suite
-
+### Level 3: FULL_SUITE
 ```bash
 bun test && bun run build
 ```
+**EXPECT**: All tests pass, build succeeds, dist/ created
 
-### Level 4: Database Validation (Supabase MCP)
+### Level 4: DATABASE_VALIDATION (if schema changes)
+Use Supabase MCP to verify:
+- [ ] Table created with correct columns
+- [ ] RLS policies applied
+- [ ] Indexes created
 
-{Use Supabase MCP to verify:}
+### Level 5: BROWSER_VALIDATION (if UI changes)
+Use Browser MCP to verify:
+- [ ] UI renders correctly
+- [ ] User flows work end-to-end
+- [ ] Error states display properly
 
-- Schema changes applied correctly
-- RLS policies in place
-- Data migrations successful
-- Indexes created as expected
-
-### Level 5: Browser Validation (Browser MCP)
-
-{Use Browser MCP to verify:}
-
-- UI renders correctly
-- User flows work end-to-end
-- Forms submit and validate
-- Error states display properly
-- Responsive behavior on different viewports
-
-### Level 6: Manual Validation
-
-{Additional manual steps if MCP validation insufficient}
+### Level 6: MANUAL_VALIDATION
+{Step-by-step manual testing specific to this feature}
 
 ---
 
 ## Acceptance Criteria
 
-- [ ] All specified functionality implemented
-- [ ] Validation commands pass (Level 1-3)
-- [ ] Unit tests added with 80%+ coverage
-- [ ] Code follows project patterns exactly
+- [ ] All specified functionality implemented per user story
+- [ ] Level 1-3 validation commands pass with exit 0
+- [ ] Unit tests cover >= 80% of new code
+- [ ] Code mirrors existing patterns exactly (naming, structure, logging)
 - [ ] No regressions in existing tests
-- [ ] Manual validation confirms feature works
+- [ ] UX matches "After State" diagram
 
 ---
 
 ## Completion Checklist
 
-- [ ] All tasks completed in order
-- [ ] Each task validated immediately after
+- [ ] All tasks completed in dependency order
+- [ ] Each task validated immediately after completion
 - [ ] Level 1: `bun run lint && npx tsc --noEmit` passes
 - [ ] Level 2: `bun test {pattern}` passes
 - [ ] Level 3: `bun test && bun run build` succeeds
-- [ ] Level 4: Supabase MCP validation passes (if DB changes)
-- [ ] Level 5: Browser MCP validation passes (if UI changes)
-- [ ] Level 6: Manual validation confirms feature
+- [ ] Level 4: Database validation passes (if applicable)
+- [ ] Level 5: Browser validation passes (if applicable)
 - [ ] All acceptance criteria met
+
+---
+
+## Risks and Mitigations
+
+| Risk | Likelihood | Impact | Mitigation |
+|------|------------|--------|------------|
+| {Risk description} | LOW/MED/HIGH | LOW/MED/HIGH | {Specific prevention/handling strategy} |
 
 ---
 
 ## Notes
 
-{Additional context, design decisions, trade-offs, risks}
-
+{Additional context, design decisions, trade-offs, future considerations}
 ```
 
 </process>
 
 <output>
-**File created**: `.agents/plans/{feature-name}.plan.md`
+**OUTPUT_FILE**: `.agents/plans/{kebab-case-feature-name}.plan.md`
 
-**Report to user:**
-- Summary of feature and approach
-- Full path to plan file
-- Complexity assessment
-- Key risks or considerations
-- Confidence score (1-10) for one-pass implementation success
-- Next step: "To execute, run: `/execute-plan .agents/plans/{feature-name}.plan.md`"
+**REPORT_TO_USER** (display after creating plan):
+
+```markdown
+## Plan Created
+
+**File**: `.agents/plans/{feature-name}.plan.md`
+
+**Summary**: {2-3 sentence feature overview}
+
+**Complexity**: {LOW/MEDIUM/HIGH} - {brief rationale}
+
+**Scope**:
+- {N} files to CREATE
+- {M} files to UPDATE
+- {K} total tasks
+
+**Key Patterns Discovered**:
+- {Pattern 1 from Explore agent with file:line}
+- {Pattern 2 from Explore agent with file:line}
+
+**External Research**:
+- {Key doc 1 with version}
+- {Key doc 2 with version}
+
+**UX Transformation**:
+- BEFORE: {one-line current state}
+- AFTER: {one-line new state}
+
+**Risks**:
+- {Primary risk}: {mitigation}
+
+**Confidence Score**: {1-10}/10 for one-pass implementation success
+- {Rationale for score}
+
+**Next Step**: To execute, run: `/execute-plan .agents/plans/{feature-name}.plan.md`
+```
 </output>
 
 <verification>
-Before finalizing the plan, verify:
+**FINAL_VALIDATION before saving plan:**
 
-- [ ] User story is clear and complete
-- [ ] Codebase patterns documented with actual file:line references
-- [ ] UX before/after diagrams included
-- [ ] All mandatory reading files exist and are relevant
-- [ ] Tasks are ordered by dependency
-- [ ] Each task has executable validation command
-- [ ] No generic placeholders - all content is specific
-- [ ] Plan passes "No Prior Knowledge Test" - unfamiliar dev could implement
+**CONTEXT_COMPLETENESS:**
+- [ ] All patterns from Explore agent documented with file:line references
+- [ ] External docs versioned to match package.json
+- [ ] Integration points mapped with specific file paths
+- [ ] Gotchas captured with mitigation strategies
+- [ ] Every task has at least one executable validation command
+
+**IMPLEMENTATION_READINESS:**
+- [ ] Tasks ordered by dependency (can execute top-to-bottom)
+- [ ] Each task is atomic and independently testable
+- [ ] No placeholders - all content is specific and actionable
+- [ ] Pattern references include actual code snippets (copy-pasted, not invented)
+
+**PATTERN_FAITHFULNESS:**
+- [ ] Every new file mirrors existing codebase style exactly
+- [ ] No unnecessary abstractions introduced
+- [ ] Naming follows discovered conventions
+- [ ] Error/logging patterns match existing
+- [ ] Test structure matches existing tests
+
+**VALIDATION_COVERAGE:**
+- [ ] Every task has executable validation command
+- [ ] All 6 validation levels defined where applicable
+- [ ] Edge cases enumerated with test plans
+
+**UX_CLARITY:**
+- [ ] Before/After ASCII diagrams are detailed and accurate
+- [ ] Data flows are traceable
+- [ ] User value is explicit and measurable
+
+**NO_PRIOR_KNOWLEDGE_TEST**: Could an agent unfamiliar with this codebase implement using ONLY the plan?
 </verification>
 
 <success_criteria>
-**Context Complete**: All patterns, gotchas, and integration points documented
-**Implementation Ready**: Tasks executable top-to-bottom without questions
-**Pattern Faithful**: Every new file mirrors existing codebase style
-**Validation Defined**: Every task has executable verification command
-**One-Pass Target**: Confidence score 1-10 for first-attempt success
+**CONTEXT_COMPLETE**: All patterns, gotchas, integration points documented from actual codebase via Explore agent
+**IMPLEMENTATION_READY**: Tasks executable top-to-bottom without questions, research, or clarification
+**PATTERN_FAITHFUL**: Every new file mirrors existing codebase style exactly
+**VALIDATION_DEFINED**: Every task has executable verification command
+**UX_DOCUMENTED**: Before/After transformation is visually clear with data flows
+**ONE_PASS_TARGET**: Confidence score 8+ indicates high likelihood of first-attempt success
 </success_criteria>
-```
