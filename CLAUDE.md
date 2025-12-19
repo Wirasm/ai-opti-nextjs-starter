@@ -199,3 +199,11 @@ logger.info({ communityId }, "community.create_completed");
 logger.error({ communityId, error }, "community.create_failed");
 ```
 States: `_started`, `_completed`, `_failed`. This makes logs grep-able and traceable.
+
+## Zod v4
+
+Import from `zod/v4`, not `zod`:
+```typescript
+import { z } from "zod/v4";
+```
+`z.record` requires two args: `z.record(z.string(), z.unknown())` not `z.record(z.unknown())`.
