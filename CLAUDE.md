@@ -5,12 +5,14 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## Commands
 
 ```bash
-bun run dev        # Start development server
-bun run build      # Production build (includes type checking)
-bun run lint       # Check for lint/format errors (Biome)
-bun run lint:fix   # Auto-fix lint/format issues
-bun run format     # Format all files
-npx tsc --noEmit   # Type check only (fast, no build)
+bun run dev          # Start development server
+bun run build        # Production build (includes type checking)
+bun run lint         # Check for lint/format errors (Biome)
+bun run lint:fix     # Auto-fix lint/format issues
+bun run format       # Format all files
+npx tsc --noEmit     # Type check only (fast, no build)
+bun test             # Run tests with coverage
+bun test --watch     # Watch mode for TDD
 ```
 
 ## Self-Correction Workflow
@@ -38,6 +40,33 @@ Errors include file path, line, and column: `src/app/page.tsx:15:3`
 - The error message describes what's wrong
 - Fix and re-run until all checks pass
 
+## Testing
+
+Tests are executable specifications and provide precise feedback for AI-generated code.
+
+**Run tests after implementing features:**
+```bash
+bun test
+```
+
+**Why tests matter for AI development:**
+- Test failures tell you exactly what's broken: test name, file:line, expected vs actual
+- Tests define "done"—write them first when possible
+- Fast execution (~10x faster than Jest) enables frequent runs
+- Coverage reports (80% threshold) show gaps
+
+**Test file conventions:**
+- Place tests next to source: `format.ts` → `format.test.ts`
+- Use `describe` and `it` blocks from `bun:test`
+- React components: use `@testing-library/react` with `render`, `screen`, `userEvent`
+
+**Self-correction with tests:**
+1. Write test defining expected behavior
+2. Implement the feature
+3. Run `bun test`
+4. If test fails, read the diff (expected vs actual)
+5. Fix and re-run until green
+
 ## Tech Stack
 
 - Next.js 16 with App Router
@@ -46,6 +75,7 @@ Errors include file path, line, and column: `src/app/page.tsx:15:3`
 - Tailwind CSS 4
 - Biome for linting and formatting
 - shadcn/ui for components
+- Bun test runner with React Testing Library
 
 ## shadcn/ui Components
 
