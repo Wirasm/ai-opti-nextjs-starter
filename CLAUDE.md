@@ -56,7 +56,8 @@ bun test
 - Coverage reports (80% threshold) show gaps
 
 **Test file conventions:**
-- Place tests next to source: `format.ts` → `format.test.ts`
+- Feature slices: place tests in `tests/` subfolder (e.g., `src/features/projects/tests/service.test.ts`)
+- Shared utilities: place tests next to source (e.g., `format.ts` → `format.test.ts`)
 - Use `describe` and `it` blocks from `bun:test`
 - React components: use `@testing-library/react` with `render`, `screen`, `userEvent`
 
@@ -78,6 +79,98 @@ bun test
 - Bun test runner with React Testing Library
 - Supabase (auth + postgres)
 - Drizzle ORM (type-safe database access)
+
+## Vertical Slice Architecture
+
+Features are organized as self-contained vertical slices in `src/features/`. Each slice owns its entire stack: data model, validation, database operations, business logic, and errors.
+
+**Why vertical slices:**
+- **Independence**: To understand "projects", read `src/features/projects/`. No hunting across layers.
+- **Isolation**: Changes to one feature don't affect others. Easy to add, modify, or delete features.
+- **Consistency**: Every feature follows the same structure, reducing cognitive load.
+- **Testability**: Clear boundaries make unit testing straightforward.
+
+### Feature Structure
+
+```
+src/features/{feature}/
+├── models.ts      # Drizzle types (re-export from core/database/schema)
+├── schemas.ts     # Zod validation schemas (API contracts)
+├── repository.ts  # Database queries (isolated, no business logic)
+├── service.ts     # Business logic (orchestrates repository + validation + logging)
+├── errors.ts      # Custom error classes (explicit failure modes)
+├── index.ts       # Public API (controls what other code can import)
+└── tests/         # All tests for this feature
+    ├── schemas.test.ts
+    ├── errors.test.ts
+    └── service.test.ts
+```
+
+### File Responsibilities
+
+| File | Purpose | Imports From |
+|------|---------|--------------|
+| `models.ts` | Re-exports table from `core/database/schema`, defines `Project` and `NewProject` types | `core/database/schema` |
+| `schemas.ts` | Zod schemas for input validation (`CreateProjectSchema`, `UpdateProjectSchema`) | `zod/v4` |
+| `errors.ts` | Feature-specific errors with `code` and `statusCode` for API responses | Nothing (self-contained) |
+| `repository.ts` | Pure database operations (`findById`, `create`, `update`, `delete`) | `core/database/client`, `models.ts` |
+| `service.ts` | Business logic, access control, logging. Calls repository, never touches db directly | `repository.ts`, `errors.ts`, `core/logging` |
+| `index.ts` | Public exports. Exposes service functions and types, hides repository | All feature files |
+
+### Creating a New Feature
+
+1. **Copy an existing feature** (e.g., `projects/`) as a template
+2. **Define the schema** in `core/database/schema.ts` (table definition)
+3. **Update `models.ts`** to re-export the table and infer types
+4. **Create Zod schemas** for input validation
+5. **Define error classes** for failure modes
+6. **Implement repository** with database operations
+7. **Implement service** with business logic and logging
+8. **Export public API** from `index.ts`
+9. **Write tests** in `tests/` subfolder
+
+### Key Patterns
+
+**Repository vs Service separation:**
+```typescript
+// repository.ts - Pure database operations, no business logic
+export async function findById(id: string): Promise<Project | undefined> {
+  const results = await db.select().from(projects).where(eq(projects.id, id)).limit(1);
+  return results[0];
+}
+
+// service.ts - Business logic, access control, logging
+export async function getProject(id: string, userId: string | null): Promise<Project> {
+  logger.info({ projectId: id }, "project.get_started");
+  const project = await repository.findById(id);
+  if (!project) throw new ProjectNotFoundError(id);
+  if (!project.isPublic && project.ownerId !== userId) throw new ProjectAccessDeniedError(id);
+  logger.info({ projectId: id }, "project.get_completed");
+  return project;
+}
+```
+
+**Error classes with HTTP semantics:**
+```typescript
+export class ProjectNotFoundError extends ProjectError {
+  constructor(id: string) {
+    super(`Project not found: ${id}`, "PROJECT_NOT_FOUND", 404);
+  }
+}
+```
+
+**Public API via index.ts:**
+```typescript
+// Export types and schemas
+export type { Project, NewProject } from "./models";
+export { CreateProjectSchema, UpdateProjectSchema } from "./schemas";
+
+// Export errors
+export { ProjectNotFoundError, ProjectAccessDeniedError } from "./errors";
+
+// Export service functions (NOT repository - keep it internal)
+export { createProject, getProject, updateProject, deleteProject } from "./service";
+```
 
 ## Database Commands
 

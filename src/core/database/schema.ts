@@ -1,4 +1,4 @@
-import { pgTable, text, timestamp, uuid } from "drizzle-orm/pg-core";
+import { boolean, pgTable, text, timestamp, uuid } from "drizzle-orm/pg-core";
 
 /**
  * Base timestamp columns for all tables.
@@ -36,5 +36,20 @@ export const users = pgTable("users", {
   email: text("email").notNull(),
   displayName: text("display_name"),
   avatarUrl: text("avatar_url"),
+  ...timestamps,
+});
+
+/**
+ * Projects table - stores project information with ownership.
+ */
+export const projects = pgTable("projects", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  name: text("name").notNull(),
+  slug: text("slug").notNull().unique(),
+  description: text("description"),
+  isPublic: boolean("is_public").notNull().default(false),
+  ownerId: uuid("owner_id")
+    .notNull()
+    .references(() => users.id, { onDelete: "cascade" }),
   ...timestamps,
 });
