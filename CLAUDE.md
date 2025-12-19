@@ -45,6 +45,30 @@ Errors include file path, line, and column: `src/app/page.tsx:15:3`
 - TypeScript (strict mode)
 - Tailwind CSS 4
 - Biome for linting and formatting
+- shadcn/ui for components
+
+## shadcn/ui Components
+
+Components are copied into `src/components/ui/` - you can read and modify them directly.
+
+**Add new components:**
+```bash
+bunx shadcn@canary add <component-name>
+```
+
+**Examples:**
+```bash
+bunx shadcn@canary add button
+bunx shadcn@canary add dialog alert-dialog
+```
+
+**After adding components, run `bun run lint:fix`** to format them to match our style.
+
+**Component locations:**
+- `src/components/ui/` - shadcn primitives (button, dialog, etc.)
+- `src/components/` - app-level components (theme-provider, theme-toggle)
+- `src/shared/components/` - custom shared components
+- `src/lib/utils.ts` - `cn()` utility for merging Tailwind classes
 
 ## Code Style
 
