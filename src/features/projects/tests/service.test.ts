@@ -24,7 +24,15 @@ const mockRepository = {
 mock.module("../repository", () => mockRepository);
 
 // Import service after mocking
-const { createProject, deleteProject, getProject, updateProject } = await import("../service");
+const {
+  createProject,
+  deleteProject,
+  getProject,
+  getProjectBySlug,
+  getProjectCount,
+  getProjectsByOwner,
+  updateProject,
+} = await import("../service");
 
 const mockProject: Project = {
   id: "550e8400-e29b-41d4-a716-446655440000",
@@ -180,5 +188,141 @@ describe("deleteProject", () => {
     mockRepository.findById.mockResolvedValue(mockProject);
 
     await expect(deleteProject(mockProject.id, otherUserId)).rejects.toThrow("Access denied");
+  });
+
+  it("throws ProjectNotFoundError when delete fails after ownership check (race condition)", async () => {
+    mockRepository.findByIdAndOwner.mockResolvedValue(mockProject);
+    mockRepository.deleteById.mockResolvedValue(false);
+
+    await expect(deleteProject(mockProject.id, ownerId)).rejects.toThrow("Project not found");
+  });
+});
+
+describe("getProjectBySlug", () => {
+  beforeEach(() => {
+    mockRepository.findBySlug.mockReset();
+  });
+
+  it("returns project when user is owner", async () => {
+    mockRepository.findBySlug.mockResolvedValue(mockProject);
+
+    const result = await getProjectBySlug("test-project", ownerId);
+
+    expect(result).toEqual(mockProject);
+  });
+
+  it("returns public project for any user", async () => {
+    const publicProject = { ...mockProject, isPublic: true };
+    mockRepository.findBySlug.mockResolvedValue(publicProject);
+
+    const result = await getProjectBySlug("test-project", otherUserId);
+
+    expect(result).toEqual(publicProject);
+  });
+
+  it("returns public project for unauthenticated user", async () => {
+    const publicProject = { ...mockProject, isPublic: true };
+    mockRepository.findBySlug.mockResolvedValue(publicProject);
+
+    const result = await getProjectBySlug("test-project", null);
+
+    expect(result).toEqual(publicProject);
+  });
+
+  it("throws ProjectNotFoundError when slug does not exist", async () => {
+    mockRepository.findBySlug.mockResolvedValue(undefined);
+
+    await expect(getProjectBySlug("non-existent", ownerId)).rejects.toThrow("Project not found");
+  });
+
+  it("throws ProjectAccessDeniedError for private project with non-owner", async () => {
+    mockRepository.findBySlug.mockResolvedValue(mockProject);
+
+    await expect(getProjectBySlug("test-project", otherUserId)).rejects.toThrow("Access denied");
+  });
+
+  it("throws ProjectAccessDeniedError for private project with null user", async () => {
+    mockRepository.findBySlug.mockResolvedValue(mockProject);
+
+    await expect(getProjectBySlug("test-project", null)).rejects.toThrow("Access denied");
+  });
+});
+
+describe("createProject - slug exhaustion", () => {
+  beforeEach(() => {
+    mockRepository.findBySlug.mockReset();
+    mockRepository.create.mockReset();
+  });
+
+  it("throws ProjectSlugExistsError after max retry attempts", async () => {
+    mockRepository.findBySlug.mockResolvedValue(mockProject);
+
+    await expect(createProject({ name: "Test", isPublic: false }, ownerId)).rejects.toThrow(
+      "Project slug already exists",
+    );
+    expect(mockRepository.findBySlug).toHaveBeenCalledTimes(10);
+  });
+});
+
+describe("updateProject - race condition", () => {
+  beforeEach(() => {
+    mockRepository.findById.mockReset();
+    mockRepository.findByIdAndOwner.mockReset();
+    mockRepository.update.mockReset();
+  });
+
+  it("throws ProjectNotFoundError when update fails after ownership check", async () => {
+    mockRepository.findByIdAndOwner.mockResolvedValue(mockProject);
+    mockRepository.update.mockResolvedValue(undefined);
+
+    await expect(updateProject(mockProject.id, { name: "New Name" }, ownerId)).rejects.toThrow(
+      "Project not found",
+    );
+  });
+});
+
+describe("getProjectsByOwner", () => {
+  beforeEach(() => {
+    mockRepository.findByOwnerId.mockReset();
+  });
+
+  it("returns projects for owner", async () => {
+    mockRepository.findByOwnerId.mockResolvedValue([mockProject]);
+
+    const result = await getProjectsByOwner(ownerId);
+
+    expect(result).toEqual([mockProject]);
+    expect(mockRepository.findByOwnerId).toHaveBeenCalledWith(ownerId);
+  });
+
+  it("returns empty array when no projects", async () => {
+    mockRepository.findByOwnerId.mockResolvedValue([]);
+
+    const result = await getProjectsByOwner(ownerId);
+
+    expect(result).toEqual([]);
+  });
+});
+
+describe("getProjectCount", () => {
+  beforeEach(() => {
+    mockRepository.countByOwnerId.mockReset();
+  });
+
+  it("returns count from repository", async () => {
+    mockRepository.countByOwnerId.mockResolvedValue(5);
+
+    const result = await getProjectCount(ownerId);
+
+    expect(result).toBe(5);
+    expect(mockRepository.countByOwnerId).toHaveBeenCalledWith(ownerId);
+  });
+
+  it("returns zero when no projects", async () => {
+    mockRepository.countByOwnerId.mockResolvedValue(0);
+
+    const result = await getProjectCount(ownerId);
+
+    expect(result).toBe(0);
   });
 });

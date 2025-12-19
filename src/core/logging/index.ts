@@ -17,15 +17,15 @@ export { generateRequestId, getRequestContext, logger, setRequestContext, withRe
  * Get a child logger for a specific component.
  * Automatically includes request context (requestId, userId) when available.
  *
- * @param component - Component name using dotted namespace pattern (e.g., "auth.service", "communities.api")
+ * @param component - Component name using dotted namespace pattern (e.g., "auth.service", "projects.api")
  *
  * @example
- * const logger = getLogger("communities.service");
+ * const logger = getLogger("projects.service");
  *
- * // Pattern: domain.component.action_state
- * logger.info({ communityId }, "community.create_started");
- * logger.info({ communityId, membersCount }, "community.create_completed");
- * logger.error({ communityId, error }, "community.create_failed");
+ * // Pattern: domain.action_state
+ * logger.info({ projectId }, "project.create_started");
+ * logger.info({ projectId }, "project.create_completed");
+ * logger.error({ projectId, error }, "project.create_failed");
  */
 export function getLogger(component: string): PinoLogger {
   const context = getRequestContext();

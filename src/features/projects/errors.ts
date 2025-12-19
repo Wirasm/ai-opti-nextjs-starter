@@ -1,11 +1,19 @@
+import type { HttpStatusCode } from "@/core/api/errors";
+
+/** Known error codes for project operations. */
+export type ProjectErrorCode =
+  | "PROJECT_NOT_FOUND"
+  | "PROJECT_SLUG_EXISTS"
+  | "PROJECT_ACCESS_DENIED";
+
 /**
  * Base error for project-related errors.
  */
 export class ProjectError extends Error {
-  readonly code: string;
-  readonly statusCode: number;
+  readonly code: ProjectErrorCode;
+  readonly statusCode: HttpStatusCode;
 
-  constructor(message: string, code: string, statusCode: number) {
+  constructor(message: string, code: ProjectErrorCode, statusCode: HttpStatusCode) {
     super(message);
     this.name = this.constructor.name;
     this.code = code;
@@ -13,27 +21,18 @@ export class ProjectError extends Error {
   }
 }
 
-/**
- * Thrown when a project is not found.
- */
 export class ProjectNotFoundError extends ProjectError {
   constructor(identifier: string) {
     super(`Project not found: ${identifier}`, "PROJECT_NOT_FOUND", 404);
   }
 }
 
-/**
- * Thrown when a project slug already exists.
- */
 export class ProjectSlugExistsError extends ProjectError {
   constructor(slug: string) {
     super(`Project slug already exists: ${slug}`, "PROJECT_SLUG_EXISTS", 409);
   }
 }
 
-/**
- * Thrown when user doesn't have access to a project.
- */
 export class ProjectAccessDeniedError extends ProjectError {
   constructor(projectId: string) {
     super(`Access denied to project: ${projectId}`, "PROJECT_ACCESS_DENIED", 403);

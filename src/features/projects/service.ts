@@ -33,7 +33,6 @@ async function generateUniqueSlug(name: string): Promise<string> {
     if (!existing) {
       return slug;
     }
-    // Append random suffix
     const suffix = Math.random().toString(36).substring(2, 8);
     slug = `${baseSlug}-${suffix}`;
     attempts++;
@@ -76,7 +75,6 @@ export async function getProject(id: string, userId: string | null): Promise<Pro
     throw new ProjectNotFoundError(id);
   }
 
-  // Allow access if public or if user is owner
   if (!project.isPublic && project.ownerId !== userId) {
     logger.warn({ projectId: id, userId }, "project.access_denied");
     throw new ProjectAccessDeniedError(id);
@@ -100,7 +98,6 @@ export async function getProjectBySlug(slug: string, userId: string | null): Pro
     throw new ProjectNotFoundError(slug);
   }
 
-  // Allow access if public or if user is owner
   if (!project.isPublic && project.ownerId !== userId) {
     logger.warn({ slug, userId }, "project.access_denied");
     throw new ProjectAccessDeniedError(project.id);
@@ -133,7 +130,6 @@ export async function updateProject(
 ): Promise<Project> {
   logger.info({ projectId: id, userId }, "project.update_started");
 
-  // Check ownership
   const existing = await repository.findByIdAndOwner(id, userId);
   if (!existing) {
     const project = await repository.findById(id);
@@ -175,7 +171,6 @@ export async function updateProject(
 export async function deleteProject(id: string, userId: string): Promise<void> {
   logger.info({ projectId: id, userId }, "project.delete_started");
 
-  // Check ownership
   const existing = await repository.findByIdAndOwner(id, userId);
   if (!existing) {
     const project = await repository.findById(id);

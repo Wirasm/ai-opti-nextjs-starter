@@ -1,6 +1,5 @@
-// Types
-
 // Errors
+export type { ProjectErrorCode } from "./errors";
 export {
   ProjectAccessDeniedError,
   ProjectError,

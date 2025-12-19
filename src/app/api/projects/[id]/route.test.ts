@@ -162,6 +162,19 @@ describe("PATCH /api/projects/[id]", () => {
     expect(response.status).toBe(403);
     expect(data.code).toBe("PROJECT_ACCESS_DENIED");
   });
+
+  it("returns 400 for invalid update input", async () => {
+    const request = new NextRequest("http://localhost:3000/api/projects/project-123", {
+      method: "PATCH",
+      body: JSON.stringify({ name: "ab" }), // Too short (min 3 chars)
+      headers: { "Content-Type": "application/json" },
+    });
+    const response = await PATCH(request, createParams("project-123"));
+    const data = await response.json();
+
+    expect(response.status).toBe(400);
+    expect(data.code).toBe("VALIDATION_ERROR");
+  });
 });
 
 describe("DELETE /api/projects/[id]", () => {
@@ -207,5 +220,23 @@ describe("DELETE /api/projects/[id]", () => {
 
     expect(response.status).toBe(404);
     expect(data.code).toBe("PROJECT_NOT_FOUND");
+  });
+
+  it("returns 403 for non-owner", async () => {
+    mockGetUser.mockResolvedValueOnce({
+      data: { user: { id: "other-user", email: "other@example.com" } },
+      error: null,
+    });
+    mockFindByIdAndOwner.mockResolvedValueOnce(undefined); // Not owner
+    mockFindById.mockResolvedValueOnce(mockProject); // Project exists
+
+    const request = new NextRequest("http://localhost:3000/api/projects/project-123", {
+      method: "DELETE",
+    });
+    const response = await DELETE(request, createParams("project-123"));
+    const data = await response.json();
+
+    expect(response.status).toBe(403);
+    expect(data.code).toBe("PROJECT_ACCESS_DENIED");
   });
 });

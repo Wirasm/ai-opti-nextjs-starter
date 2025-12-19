@@ -35,7 +35,20 @@ export async function GET(request: NextRequest) {
       pageSize: searchParams.get("pageSize") ? Number(searchParams.get("pageSize")) : undefined,
     });
 
-    const pagination = paginationResult.success ? paginationResult.data : { page: 1, pageSize: 20 };
+    let pagination: { page: number; pageSize: number };
+    if (paginationResult.success) {
+      pagination = paginationResult.data;
+    } else {
+      logger.warn(
+        {
+          errors: paginationResult.error.flatten(),
+          rawPage: searchParams.get("page"),
+          rawPageSize: searchParams.get("pageSize"),
+        },
+        "projects.list_invalid_pagination",
+      );
+      pagination = { page: 1, pageSize: 20 };
+    }
 
     logger.info({ userId: user.id, pagination }, "projects.list_started");
 

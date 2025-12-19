@@ -23,6 +23,7 @@ mock.module("@/core/logging", () => ({
   getLogger: () => ({
     info: mock(() => {}),
     warn: mock(() => {}),
+    error: mock(() => {}),
   }),
 }));
 

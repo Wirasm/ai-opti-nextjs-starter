@@ -1,8 +1,5 @@
 import { z } from "zod/v4";
 
-/**
- * Schema for creating a new project.
- */
 export const CreateProjectSchema = z.object({
   name: z
     .string()
@@ -14,9 +11,6 @@ export const CreateProjectSchema = z.object({
 
 export type CreateProjectInput = z.infer<typeof CreateProjectSchema>;
 
-/**
- * Schema for updating an existing project.
- */
 export const UpdateProjectSchema = z.object({
   name: z
     .string()
@@ -29,9 +23,6 @@ export const UpdateProjectSchema = z.object({
 
 export type UpdateProjectInput = z.infer<typeof UpdateProjectSchema>;
 
-/**
- * Schema for project response (API output).
- */
 export const ProjectResponseSchema = z.object({
   id: z.string().uuid(),
   name: z.string(),

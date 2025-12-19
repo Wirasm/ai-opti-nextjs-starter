@@ -9,15 +9,15 @@ import {
 
 describe("ProjectError", () => {
   it("creates error with message, code, and status", () => {
-    const error = new ProjectError("Test error", "TEST_ERROR", 500);
+    const error = new ProjectError("Test error", "PROJECT_NOT_FOUND", 404);
     expect(error.message).toBe("Test error");
-    expect(error.code).toBe("TEST_ERROR");
-    expect(error.statusCode).toBe(500);
+    expect(error.code).toBe("PROJECT_NOT_FOUND");
+    expect(error.statusCode).toBe(404);
     expect(error.name).toBe("ProjectError");
   });
 
   it("is instanceof Error", () => {
-    const error = new ProjectError("Test", "TEST", 500);
+    const error = new ProjectError("Test", "PROJECT_NOT_FOUND", 404);
     expect(error).toBeInstanceOf(Error);
   });
 });

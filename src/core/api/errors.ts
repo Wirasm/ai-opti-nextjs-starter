@@ -8,25 +8,35 @@ import { createErrorResponse, type ErrorResponse } from "@/shared/schemas/errors
 const logger = getLogger("api.errors");
 
 /**
- * Base interface for errors with HTTP status codes.
+ * Valid HTTP status codes for API errors.
+ */
+export type HttpStatusCode = 400 | 401 | 403 | 404 | 409 | 500;
+
+/**
+ * Shape of errors that carry HTTP semantics.
+ * Used for type narrowing in error handlers.
  */
 interface HttpError {
   message: string;
   code: string;
-  statusCode: number;
+  statusCode: HttpStatusCode;
 }
+
+const VALID_STATUS_CODES = new Set<HttpStatusCode>([400, 401, 403, 404, 409, 500]);
 
 /**
  * Check if an error has HTTP error properties.
  */
 function isHttpError(error: unknown): error is HttpError {
-  return (
-    error instanceof Error &&
-    "code" in error &&
-    "statusCode" in error &&
-    typeof (error as HttpError).code === "string" &&
-    typeof (error as HttpError).statusCode === "number"
-  );
+  if (!(error instanceof Error)) {
+    return false;
+  }
+  if (!("code" in error) || !("statusCode" in error)) {
+    return false;
+  }
+
+  const { code, statusCode } = error as { code: unknown; statusCode: unknown };
+  return typeof code === "string" && VALID_STATUS_CODES.has(statusCode as HttpStatusCode);
 }
 
 /**

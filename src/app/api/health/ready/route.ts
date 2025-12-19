@@ -29,18 +29,17 @@ export async function GET() {
   try {
     await db.execute(sql`SELECT 1`);
     checks.database = "connected";
-  } catch {
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "Unknown database error";
+    logger.error({ error: message }, "health.ready_db_check_failed");
     allHealthy = false;
   }
 
   // Check auth configuration
-  try {
-    if (env.NEXT_PUBLIC_SUPABASE_URL && env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
-      checks.auth = "configured";
-    } else {
-      allHealthy = false;
-    }
-  } catch {
+  if (env.NEXT_PUBLIC_SUPABASE_URL && env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
+    checks.auth = "configured";
+  } else {
+    logger.warn("health.ready_auth_config_missing");
     allHealthy = false;
   }
 
