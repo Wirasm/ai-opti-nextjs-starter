@@ -23,6 +23,7 @@ CLAUDE.md rules: @CLAUDE.md
 ## Phase 1: Feature Understanding
 
 **Parse the input and clarify:**
+
 - Extract core problem being solved
 - Identify user value and business impact
 - Determine type: New Capability | Enhancement | Refactor | Bug Fix
@@ -30,6 +31,7 @@ CLAUDE.md rules: @CLAUDE.md
 - Map affected systems
 
 **Create or refine user story:**
+
 ```
 As a <user type>
 I want to <action/goal>
@@ -76,12 +78,14 @@ So that <benefit/value>
 ## Phase 3: External Research (AFTER codebase analysis)
 
 **Use WebSearch for:**
+
 - Official documentation for involved libraries
 - Latest version info and breaking changes
 - Common implementation patterns and gotchas
 - Security considerations
 
 **Compile with specific anchors:**
+
 ```markdown
 - [Docs Title](https://url#specific-section)
   - Key insight: What we learned
@@ -110,6 +114,7 @@ AFTER:
 ```
 
 **Document interaction changes:**
+
 - What screens/endpoints change
 - New user actions available
 - Changed data flows
@@ -119,6 +124,7 @@ AFTER:
 ## Phase 5: Strategic Design
 
 **Think deeply about:**
+
 - How does this fit existing architecture?
 - What are critical dependencies and execution order?
 - What could go wrong? (edge cases, race conditions)
@@ -126,6 +132,7 @@ AFTER:
 - Security considerations?
 
 **Design decisions:**
+
 - Approach chosen with rationale
 - Alternatives rejected with reasons
 - What we're NOT building (explicit scope limits)
@@ -134,7 +141,7 @@ AFTER:
 
 ## Phase 6: Generate Implementation Plan
 
-**Save to**: `.claude/plans/{feature-name}.plan.md`
+**Save to**: `.agents/plans/{feature-name}.plan.md`
 
 **Plan structure:**
 
@@ -142,20 +149,25 @@ AFTER:
 # Feature: {Feature Name}
 
 ## Summary
+
 {One paragraph: What we're building and the high-level approach}
 
 ## User Story
+
 As a {user type}
 I want to {action}
 So that {benefit}
 
 ## Problem Statement
+
 {What specific problem this solves}
 
 ## Solution Statement
+
 {How we're solving it}
 
 ## Metadata
+
 - **Type**: New Capability | Enhancement | Refactor | Bug Fix
 - **Complexity**: Low | Medium | High
 - **Systems Affected**: {list}
@@ -167,13 +179,17 @@ So that {benefit}
 
 ### Before
 ```
+
 {ASCII diagram of current state}
+
 ```
 
 ### After
 ```
+
 {ASCII diagram of new state}
-```
+
+````
 
 ### Interaction Changes
 - {Change 1}
@@ -201,15 +217,17 @@ So that {benefit}
 ```typescript
 // FROM: src/features/example/service.ts:10-15
 {actual code snippet}
-```
+````
 
 **Error Handling:**
+
 ```typescript
 // FROM: src/core/api/errors.ts:50-60
 {actual code snippet}
 ```
 
 **Testing Pattern:**
+
 ```typescript
 // FROM: src/features/example/tests/service.test.ts:1-20
 {actual code snippet}
@@ -219,10 +237,10 @@ So that {benefit}
 
 ## Files to Change
 
-| File | Action | Justification |
-|------|--------|---------------|
-| `path/new.ts` | CREATE | {why} |
-| `path/existing.ts` | UPDATE | {why} |
+| File               | Action | Justification |
+| ------------------ | ------ | ------------- |
+| `path/new.ts`      | CREATE | {why}         |
+| `path/existing.ts` | UPDATE | {why}         |
 
 ---
 
@@ -246,6 +264,7 @@ Execute in order. Each task is atomic and independently verifiable.
 - **VALIDATE**: `{executable command}`
 
 ### Task 2: {ACTION} {target}
+
 ...
 
 ---
@@ -253,14 +272,17 @@ Execute in order. Each task is atomic and independently verifiable.
 ## Testing Strategy
 
 ### Unit Tests
-| Test File | Test Cases | What It Validates |
-|-----------|------------|-------------------|
-| `file.test.ts` | {cases} | {purpose} |
+
+| Test File      | Test Cases | What It Validates |
+| -------------- | ---------- | ----------------- |
+| `file.test.ts` | {cases}    | {purpose}         |
 
 ### Integration Tests
+
 {scope and approach}
 
 ### Edge Cases
+
 - [ ] {edge case 1}
 - [ ] {edge case 2}
 
@@ -269,29 +291,36 @@ Execute in order. Each task is atomic and independently verifiable.
 ## Validation Commands
 
 ### Level 1: Static Analysis
+
 ```bash
 bun run lint && npx tsc --noEmit
 ```
 
 ### Level 2: Unit Tests
+
 ```bash
 bun test {specific-pattern}
 ```
 
 ### Level 3: Full Suite
+
 ```bash
 bun test && bun run build
 ```
 
 ### Level 4: Database Validation (Supabase MCP)
+
 {Use Supabase MCP to verify:}
+
 - Schema changes applied correctly
 - RLS policies in place
 - Data migrations successful
 - Indexes created as expected
 
 ### Level 5: Browser Validation (Browser MCP)
+
 {Use Browser MCP to verify:}
+
 - UI renders correctly
 - User flows work end-to-end
 - Forms submit and validate
@@ -299,6 +328,7 @@ bun test && bun run build
 - Responsive behavior on different viewports
 
 ### Level 6: Manual Validation
+
 {Additional manual steps if MCP validation insufficient}
 
 ---
@@ -331,12 +361,13 @@ bun test && bun run build
 ## Notes
 
 {Additional context, design decisions, trade-offs, risks}
+
 ```
 
 </process>
 
 <output>
-**File created**: `.claude/plans/{feature-name}.plan.md`
+**File created**: `.agents/plans/{feature-name}.plan.md`
 
 **Report to user:**
 - Summary of feature and approach
@@ -344,7 +375,7 @@ bun test && bun run build
 - Complexity assessment
 - Key risks or considerations
 - Confidence score (1-10) for one-pass implementation success
-- Next step: "To implement, run: `/implement .claude/plans/{feature-name}.plan.md`"
+- Next step: "To execute, run: `/execute-plan .agents/plans/{feature-name}.plan.md`"
 </output>
 
 <verification>
@@ -365,5 +396,6 @@ Before finalizing the plan, verify:
 **Implementation Ready**: Tasks executable top-to-bottom without questions
 **Pattern Faithful**: Every new file mirrors existing codebase style
 **Validation Defined**: Every task has executable verification command
-**One-Pass Target**: Confidence score 8+ for first-attempt success
+**One-Pass Target**: Confidence score 1-10 for first-attempt success
 </success_criteria>
+```
