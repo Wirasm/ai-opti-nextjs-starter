@@ -76,6 +76,57 @@ bun test
 - Biome for linting and formatting
 - shadcn/ui for components
 - Bun test runner with React Testing Library
+- Supabase (auth + postgres)
+- Drizzle ORM (type-safe database access)
+
+## Database Commands
+
+```bash
+bun run db:generate  # Generate migrations from schema changes
+bun run db:migrate   # Run pending migrations
+bun run db:push      # Push schema directly (dev only)
+bun run db:studio    # Open Drizzle Studio GUI
+```
+
+## Supabase + Drizzle Setup
+
+**Key files:**
+- `src/core/config/env.ts` - Validated environment variables
+- `src/core/database/schema.ts` - Drizzle schema definitions
+- `src/core/database/client.ts` - Database client
+- `src/core/supabase/server.ts` - Server-side Supabase client
+- `src/core/supabase/client.ts` - Browser-side Supabase client
+- `src/core/supabase/proxy.ts` - Middleware for session refresh
+
+**Important patterns (learned from setup):**
+
+1. **Key naming transition**: Supabase is migrating from `ANON_KEY` to `PUBLISHABLE_KEY`. Our setup supports both - use whichever your project provides.
+
+2. **Server client cookies**: The `setAll` must be wrapped in try/catch because it can be called from Server Components where cookies cannot be set:
+   ```typescript
+   setAll(cookiesToSet) {
+     try {
+       // set cookies
+     } catch {
+       // Ignore: called from Server Component
+     }
+   }
+   ```
+
+3. **Middleware response pattern**: Must create new response inside `setAll` callback:
+   ```typescript
+   setAll(cookiesToSet) {
+     supabaseResponse = NextResponse.next({ request });
+     // then set cookies on supabaseResponse
+   }
+   ```
+
+4. **Connection pooler for serverless**: Use port 6543 (transaction pooler) with `prepare: false`:
+   ```typescript
+   postgres(url, { prepare: false })
+   ```
+
+5. **TypeScript + Biome conflict**: `noPropertyAccessFromIndexSignature` requires `process.env["KEY"]` but Biome suggests `process.env.KEY`. Use `biome-ignore` comments for `process.env` access.
 
 ## shadcn/ui Components
 
