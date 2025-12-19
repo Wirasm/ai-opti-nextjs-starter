@@ -188,3 +188,14 @@ bunx shadcn@canary add dialog alert-dialog
 - Default exports in non-Next.js files (use named exports)
 - Using `.forEach()` (use `for...of` loop instead)
 - Overly complex functions
+
+## Logging
+
+Use `getLogger("domain.component")` and the `action_state` message pattern:
+```typescript
+const logger = getLogger("communities.service");
+logger.info({ communityId }, "community.create_started");
+logger.info({ communityId }, "community.create_completed");
+logger.error({ communityId, error }, "community.create_failed");
+```
+States: `_started`, `_completed`, `_failed`. This makes logs grep-able and traceable.
