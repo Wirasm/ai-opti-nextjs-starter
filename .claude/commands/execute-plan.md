@@ -1,14 +1,16 @@
 ---
-description: Execute an implementation plan step-by-step with validation at each task
+description: Execute an implementation plan step-by-step, validate, commit, and create PR
 argument-hint: <path-to-plan.md>
 ---
 
 <objective>
-Execute the implementation plan at "$ARGUMENTS" by completing each task in order with immediate validation.
+Execute the implementation plan at "$ARGUMENTS" by completing each task in order with immediate validation, then commit and create a PR.
 
-**Core Principle**: Execute precisely what the plan specifies. No improvisation, no scope creep.
+**Core Principle**: Execute precisely what the plan specifies. No improvisation, no scope creep. Run to completion.
 
-**Validation Rule**: After each task, run its VALIDATE command. If it fails, fix before proceeding.
+**Validation Rule**: After each task, run its VALIDATE command. If it fails, fix and retry until it passes.
+
+**Completion Rule**: This command runs autonomously to completion. Always finish with a commit and PR.
 </objective>
 
 <context>
@@ -28,7 +30,7 @@ Plan file: @$ARGUMENTS
 
 **Read the Mandatory Reading files first** - understand the patterns before implementing.
 
-**CHECKPOINT**: If plan is incomplete or files are missing, STOP and report issues.
+**If plan has issues**: Note them but proceed with best effort. Document issues in final report.
 
 ---
 
@@ -40,7 +42,7 @@ Plan file: @$ARGUMENTS
 2. **MIRROR** the referenced pattern exactly
 3. **IMPLEMENT** the specific changes described
 4. **VALIDATE** immediately with the task's validate command
-5. **FIX** any issues before moving to next task
+5. **FIX** any issues until validation passes, then proceed
 
 **Task Execution Format:**
 
@@ -50,14 +52,13 @@ Plan file: @$ARGUMENTS
 [Implementation work]
 
 **Validation**: `{command}`
-**Result**: PASS | FAIL
-**Issues**: {if any}
+**Result**: PASS
 ```
 
-**STOP CONDITIONS:**
-- Validation fails and cannot be fixed → Report and await guidance
-- Task is ambiguous or missing information → Report and await guidance
-- Unexpected error or conflict → Report and await guidance
+**Recovery Strategy:**
+- If validation fails → Fix the issue and retry until it passes
+- If task is ambiguous → Use best judgment based on codebase patterns
+- If unexpected error → Debug, fix, and continue
 
 ---
 
@@ -91,16 +92,48 @@ Execute manual validation steps from plan.
 
 ---
 
-## Phase 4: Completion
+## Phase 4: Commit Changes
 
-**Verify all acceptance criteria are met:**
-- Review each criterion from the plan
-- Check the box only if truly complete
+**Create atomic commit:**
 
-**Run the Completion Checklist:**
-- All tasks completed in order
-- Each validation level passed
-- No regressions introduced
+```bash
+git add -A
+git commit -m "feat: {Feature name from plan}
+
+- {Summary of what was implemented}
+- {Key changes made}
+"
+```
+
+**Commit message guidelines:**
+- Use conventional commit prefix (feat/fix/refactor)
+- Reference the feature name from the plan
+- List key changes in bullet points
+
+---
+
+## Phase 5: Create Pull Request
+
+**Create PR with comprehensive description:**
+
+```bash
+gh pr create --title "feat: {Feature name}" --body "## Summary
+{Brief description of the feature}
+
+## Changes
+- {Change 1}
+- {Change 2}
+
+## Testing
+- All validation levels passed
+- {Specific tests added}
+
+## Plan Reference
+Executed from: $ARGUMENTS
+"
+```
+
+**After PR creation**: Report the PR URL in the output.
 
 </process>
 
@@ -113,7 +146,7 @@ Execute manual validation steps from plan.
 ## Summary
 - Tasks completed: X/Y
 - Validation levels passed: X/6
-- Time spent: {if trackable}
+- PR created: {PR URL}
 
 ## Tasks Executed
 - [x] Task 1: {description} - PASS
@@ -135,9 +168,10 @@ Execute manual validation steps from plan.
 ## Issues Encountered
 {Any issues and how they were resolved, or "None"}
 
-## Next Steps
-- Run `/commit` to commit changes
-- Create PR if ready
+## Result
+- Commit: {commit hash}
+- PR: {PR URL}
+- Status: COMPLETE
 ```
 </output>
 
@@ -148,12 +182,14 @@ Before reporting completion:
 - [ ] All task validations passed
 - [ ] All validation levels passed (or skipped with reason)
 - [ ] Acceptance criteria from plan verified
-- [ ] No uncommitted work that should be included
+- [ ] Changes committed with descriptive message
+- [ ] PR created with comprehensive description
 </verification>
 
 <success_criteria>
 **Task Complete**: Every task executed with passing validation
 **No Regressions**: Existing tests still pass
 **Plan Faithful**: Implementation matches plan exactly
-**Ready to Commit**: All changes are complete and validated
+**Committed**: All changes committed with conventional commit message
+**PR Created**: Pull request created with summary, changes, and testing notes
 </success_criteria>
